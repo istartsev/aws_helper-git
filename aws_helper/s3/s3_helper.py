@@ -25,25 +25,28 @@ class S3Helper(BaseAWS3Helper):
     def upload_file(self, source, destination):
         self._client.upload_file(source, self._bucket_name, destination)
 
-    def download_file_new(self, source, destination):
+    def download_file(self, source, destination):
         self._client.download_file(self._bucket_name, source, destination)
 
     def download_fileobj(self, source, destination):
         with open(destination, 'wb') as data:
             self._client.download_fileobj(self._bucket_name, source, data)
 
-    def download_file(self, source, destination):
-        key = self._client.Object(self._bucket_name, source).get()
-        with open(destination, 'w') as f:
-            chunk = key['Body'].read(BLOCK_SIZE)
-            while chunk:
-                f.write(chunk)
-                chunk = key['Body'].read(BLOCK_SIZE)
-
     def delete_file(self, filename):
         self._client.delete_object(Bucket=self._bucket_name, Key=filename)
 
+    def get_folder(self, folder_name):
+        return self._client.list_objects_v2(Bucket=self._bucket_name,
+                                            Prefix=folder_name)
+
+    def create_folder(self, folder_name):
+        return self._client.put_object(Bucket=self._bucket_name,
+                                       Body='',
+                                       Key=os.path.join(folder_name, ''))
+
     def delete_folder(self, folder_name):
-        for key in self._client.Bucket(self._bucket_name).list(
-                prefix=os.path.join(folder_name, '', '')):
-            key.delete()
+        for key in self.get_folder(folder_name)['Contents']:
+            self._client.delete_object(Bucket=self._bucket_name,
+                                       Key=key['Key'])
+
+
