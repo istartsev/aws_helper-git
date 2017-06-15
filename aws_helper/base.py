@@ -7,3 +7,7 @@ class BaseAWS3Helper(object):
                                     region_name=region,
                                     aws_access_key_id=access_key,
                                     aws_secret_access_key=secret_key)
+        self._resource = boto3.resource(service_name=service_name,
+                                        region_name=region,
+                                        aws_access_key_id=access_key,
+                                        aws_secret_access_key=secret_key)

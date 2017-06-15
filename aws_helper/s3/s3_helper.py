@@ -6,7 +6,7 @@ BLOCK_SIZE = 10 * 1024 * 1024
 
 
 class S3Helper(BaseAWS3Helper):
-    def __init__(self, bucket_name, region, access_key, secret_key):
+    def __init__(self, access_key, secret_key, bucket_name=None, region=None):
         super().__init__('s3', region, access_key, secret_key)
         self._bucket_name = bucket_name
 
@@ -15,6 +15,12 @@ class S3Helper(BaseAWS3Helper):
 
     def create_bucket(self, bucket_name):
         self._client.create_bucket(Bucket=bucket_name)
+
+    def delete_bucket(self, bucket_name):
+        bucket = self._resource.Bucket(bucket_name)
+        for key in bucket.objects.all():
+            key.delete()
+        bucket.delete()
 
     def upload_file(self, source, destination):
         self._client.upload_file(source, self._bucket_name, destination)
